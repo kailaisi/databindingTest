@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="presenter"
+            type="com.tcsl.databindingtest.simple.MainPresenter" />
+        <variable
+            name="item"
+            type="com.tcsl.databindingtest.simple.UserInfo" />
+    </data>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="@dimen/activity_vertical_margin"
+        tools:context="com.fritz.demo.DemoActivity">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:onClick="@{presenter.onSetListSize}"
+            android:text="hide or show"
+            android:textAllCaps="false" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:onTextChanged="@{presenter.onTextChanged}" />
+
+        <TextView
+            android:id="@+id/txtTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{item.unit!=null?item.unit:item.rental}"
+            android:visibility="@{item.list.size()>0?View.VISIBLE:View.GONE}" />
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:onClick="@{()->presenter.onItemClick(item)}"
+            android:src="@mipmap/ic_launcher"
+            android:visibility="@{txtTitle.visibility }" />
+    </LinearLayout>
+</layout>
