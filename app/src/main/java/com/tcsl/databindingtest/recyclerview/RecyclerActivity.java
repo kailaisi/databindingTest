@@ -1,6 +1,5 @@
 package com.tcsl.databindingtest.recyclerview;
 
-import android.databinding.*;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -9,8 +8,10 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.RelativeLayout;
 
 import com.tcsl.databindingtest.R;
+import com.tcsl.databindingtest.recyclerview.bean.result;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RecyclerActivity extends AppCompatActivity {
 
@@ -22,11 +23,12 @@ public class RecyclerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycler);
         initView();
-        ArrayList<User> mInfo = new ArrayList<>();
-        for (int i=0;i<200;i++) {
-            mInfo.add(new User("ceshi"+i));
-        }
-       // DataBindingAdapter madpater = new DataBindingAdapter(mInfo);
+        initValues();
+    }
+
+    private void initValues() {
+        DataModel model=new DataModel();
+        List<result.ResultsBean> mInfo = model.initDatas();
         MyBindingAdapter madpater=new MyBindingAdapter(this,mInfo);
         LinearLayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         rvData.setLayoutManager(manager);

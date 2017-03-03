@@ -13,6 +13,8 @@ import com.tcsl.databindingtest.BR;
  */
 public class User extends BaseObservable {
     private String name;
+    private String image;
+    private int error;
 
     public User(String name) {
         this.name = name;
@@ -26,5 +28,25 @@ public class User extends BaseObservable {
     public void setName(String name) {
         this.name = name;
         notifyPropertyChanged(BR.name);
+    }
+
+    @Bindable
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+        notifyPropertyChanged(BR.image);
+    }
+
+    @Bindable
+    public int getError() {
+        return error;
+    }
+
+    public void setError(int error) {
+        this.error = error;
+        notifyPropertyChanged(BR.error);
     }
 }

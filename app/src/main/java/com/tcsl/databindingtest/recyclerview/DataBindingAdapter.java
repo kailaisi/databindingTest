@@ -55,8 +55,8 @@ public class DataBindingAdapter extends RecyclerView.Adapter<DataBindingAdapter.
         }
 
         public void bindTo(User user) {
-            bind.setIteminfo(user);
-            bind.executePendingBindings();
+            //bind.setIteminfo(user);
+            //bind.executePendingBindings();
         }
     }
 }
