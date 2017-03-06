@@ -14,6 +14,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
+import static android.support.v7.widget.RecyclerView.NO_POSITION;
+
 /**
  * 描述:基类适配器，可以设置头，尾和空布局
  * <p/>作者：wjx
@@ -40,6 +42,14 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
 
 
     public void setOnItemClickListener(OnItemClickListener mListener) {
+        this.mListener = mListener;
+    }
+
+    public OnItemClickListener getmListener() {
+        return mListener;
+    }
+
+    public void setmListener(OnItemClickListener mListener) {
         this.mListener = mListener;
     }
 
@@ -81,10 +91,11 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
      * @param view
      * @return
      */
-    private K createBaseViewHolder(View view) {
+    private K createBaseViewHolder(final View view) {
         ParameterizedType pType = (ParameterizedType) getClass().getGenericSuperclass();//获取当前new的对象的父类的类型
         Class<K> z = (Class<K>) pType.getActualTypeArguments()[1];//获取实际的类型
         Constructor constructor;
+        final BaseViewHolder baseViewHolder = new BaseViewHolder(view);
         try {
             String buffer = Modifier.toString(z.getModifiers());
             String className = z.getName();
@@ -104,7 +115,8 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
-        return (K) new BaseViewHolder(view);
+
+        return (K)baseViewHolder ;
     }
 
     protected View getItemView(int layoutResId, ViewGroup parent) {
@@ -133,13 +145,27 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
     public abstract int getItemLayout();
 
     @Override
-    public void onBindViewHolder(K holder, int position) {
+    public void onBindViewHolder(final K holder, int position) {
         K viewHolder = holder;
         int type = getItemViewType(position);
         if (type == ITEM_TYPE_HEADER || type == ITEM_TYPE_EMPTY || type == ITEM_TYPE_FOOTER) {
             return;
         }
-        convert(viewHolder, mDatas.get(getRealPosition(position)));
+        int realPosition = getRealPosition(position);
+        T t = mDatas.get(realPosition);
+        if(mListener!=null){
+            holder.getItemView().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position1 = holder.getLayoutPosition();
+                    if(position1!=NO_POSITION) {
+                        int realPosition = getRealPosition(position1);
+                        mListener.onItemClick(holder.getItemView(),realPosition);
+                    }
+                }
+            });
+        }
+        convert(viewHolder,t);
     }
 
     protected abstract void convert(K viewHolder, T t);
@@ -244,16 +270,5 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         }
     }
 
-    /**
-     * 描述:点击回调
-     * <p/>作者：wjx
-     * <p/>创建时间: 2017/2/5 11:28
-     */
-    public interface OnItemClickListener {
-        /**
-         * @param root     点击的view
-         * @param position 点击的位置
-         */
-        void onItemClick(View root, int position);
-    }
+
 }

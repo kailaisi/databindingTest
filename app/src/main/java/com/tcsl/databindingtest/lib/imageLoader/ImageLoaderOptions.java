@@ -61,7 +61,7 @@ public class ImageLoaderOptions {
         isSkipMemoryCache = skipMemoryCache;
     }
 
-    public class ImageReSize {
+    public static class ImageReSize {
         int reWidth = 0;
         int reHeight = 0;
 
@@ -116,7 +116,6 @@ public class ImageLoaderOptions {
         }
 
         public ImageLoaderOptions build() {
-
             return new ImageLoaderOptions(this.size, this.placeHolder, this.errorDrawable, this.isCrossFade, this.isSkipMemoryCache);
         }
     }

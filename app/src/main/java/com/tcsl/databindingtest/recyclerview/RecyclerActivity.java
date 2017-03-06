@@ -5,12 +5,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.tcsl.databindingtest.R;
+import com.tcsl.databindingtest.lib.recycler.OnItemClickListener;
 import com.tcsl.databindingtest.recyclerview.bean.result;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerActivity extends AppCompatActivity {
@@ -30,6 +32,12 @@ public class RecyclerActivity extends AppCompatActivity {
         DataModel model=new DataModel();
         List<result.ResultsBean> mInfo = model.initDatas();
         MyBindingAdapter madpater=new MyBindingAdapter(this,mInfo);
+        madpater.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View root, int position) {
+                Toast.makeText(RecyclerActivity.this, "position:" + position, Toast.LENGTH_SHORT).show();
+            }
+        });
         LinearLayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         rvData.setLayoutManager(manager);
         rvData.setItemAnimator(new DefaultItemAnimator());

@@ -2,6 +2,7 @@ package com.tcsl.databindingtest.recyclerview;
 
 import android.content.Context;
 import android.databinding.ViewDataBinding;
+import android.view.View;
 
 import com.tcsl.databindingtest.R;
 import com.tcsl.databindingtest.databinding.ItemDataBindingBinding;
@@ -32,6 +33,8 @@ public class MyBindingAdapter extends BaseDataBindingAdapter<result.ResultsBean,
             return;
         }
         ItemDataBindingBinding bind= (ItemDataBindingBinding) binding;
+        View root = bind.getRoot();
         bind.setIteminfo(resultsBean);
+        bind.setAdapter(this);
     }
 }

@@ -22,6 +22,7 @@ public class ImageViewAttrAdapter {
         if(error!=0){
             builder.errorDrawable(error);
         }
+        builder.isCrossFade(true);
         ImageLoaderOptions options = builder.build();
         manager.showImage(imageView, url, options);
     }
