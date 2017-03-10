@@ -3,6 +3,7 @@
     package="com.tcsl.databindingtest">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-library android:name="android.test.runner" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,5 +22,8 @@
 
         </activity>
     </application>
-
+    <instrumentation
+        android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="">
+    </instrumentation>
 </manifest>

@@ -17,7 +17,7 @@ public class ImageLoaderStrategyManager implements ImageLoaderStrategy {
         this.loader = loader;
     }
 
-    private static ImageLoaderStrategy loader;
+    private static ImageLoaderStrategy loader=new PicassoLoader();
     private static ImageLoaderStrategyManager ourInstance = new ImageLoaderStrategyManager();
 
     public static ImageLoaderStrategyManager getInstance() {
@@ -25,7 +25,6 @@ public class ImageLoaderStrategyManager implements ImageLoaderStrategy {
     }
 
     private ImageLoaderStrategyManager() {
-        loader = new PicassoLoader();
     }
 
     @Override
