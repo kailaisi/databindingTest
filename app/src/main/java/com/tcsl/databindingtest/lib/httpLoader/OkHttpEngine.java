@@ -3,6 +3,7 @@ package com.tcsl.databindingtest.lib.httpLoader;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -99,7 +100,8 @@ public class OkHttpEngine implements HttpEngine {
                     @Override
                     public void run() {
                         try {
-                            final String result = response.body().toString();
+                            final String result = response.body().string();
+                            Log.d("OkHttpEngine", result);
                             if (callback.mType == String.class) {
                                 sendSuccessResultCallback(result, callback);
                             } else {
@@ -111,6 +113,8 @@ public class OkHttpEngine implements HttpEngine {
                         } catch (JsonParseException e)//Json解析的错误
                         {
                             sendFailedStringCallback(response.request(), e, callback);
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     }
                 });

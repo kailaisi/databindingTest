@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tcsl.databindingtest">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
     <uses-library android:name="android.test.runner" />
     <application
         android:allowBackup="true"
@@ -22,8 +25,4 @@
 
         </activity>
     </application>
-    <instrumentation
-        android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="">
-    </instrumentation>
 </manifest>

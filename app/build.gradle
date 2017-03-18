@@ -31,4 +31,6 @@ dependencies {
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.squareup.okhttp3:okhttp:3.6.0'
     compile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-all:1.10.19"
+    androidTestCompile "org.mockito:mockito-all:1.10.19"
 }
