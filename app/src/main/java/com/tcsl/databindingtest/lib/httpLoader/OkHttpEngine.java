@@ -20,7 +20,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static android.R.attr.tag;
 
 /**
  * 描述:
@@ -81,6 +80,7 @@ public class OkHttpEngine implements HttpEngine {
             }
         }
     }
+
     @Override
     public void cancel() {
 
@@ -96,28 +96,18 @@ public class OkHttpEngine implements HttpEngine {
 
             @Override
             public void onResponse(final Call call, final Response response) throws IOException {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            final String result = response.body().string();
-                            Log.d("OkHttpEngine", result);
-                            if (callback.mType == String.class) {
-                                sendSuccessResultCallback(result, callback);
-                            } else {
-                                Object o = mGson.fromJson(result, callback.mType);
-                                sendSuccessResultCallback(o, callback);
-                            }
-                        } catch (JsonIOException e) {
-                            sendFailedStringCallback(response.request(), e, callback);
-                        } catch (JsonParseException e)//Json解析的错误
-                        {
-                            sendFailedStringCallback(response.request(), e, callback);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                try {
+                    final String result = response.body().string();
+                    Log.d("OkHttpEngine", result);
+                    if (callback.mType == String.class) {
+                        sendSuccessResultCallback(result, callback);
+                    } else {
+                        Object o = mGson.fromJson(result, callback.mType);
+                        sendSuccessResultCallback(o, callback);
                     }
-                });
+                } catch (IOException e) {
+                    sendFailedStringCallback(response.request(), e, callback);
+                }
             }
         });
     }

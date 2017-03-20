@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.tcsl.databindingtest.recyclerview.RequestLoadMoreListener;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -23,9 +25,10 @@ import static android.support.v7.widget.RecyclerView.NO_POSITION;
  */
 public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> extends RecyclerView.Adapter<K> {
 
-    private int ITEM_TYPE_HEADER = 0x00000111;
-    private int ITEM_TYPE_FOOTER = 0x00000333;
-    private int ITEM_TYPE_EMPTY = 0x00000555;
+    private static int ITEM_TYPE_HEADER = 0x00000111;
+    private static int ITEM_TYPE_LOADINGMORE = 0x00000555;
+    private static int ITEM_TYPE_FOOTER = 0x00000333;
+    private static int ITEM_TYPE_EMPTY = 0x00000555;
     private View headView;
     private View footView;
     private View emptyView;
@@ -36,9 +39,29 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
      */
     protected List<T> mDatas;
     /**
-     * 是否允许加载更多
+     * 加载更多的动画
      */
-    private boolean mOpenLoadMore = false;
+    private LoadMoreView mLoadMoreView;
+    /**
+     * 发起请求更多
+     */
+    private RequestLoadMoreListener mLoadMoreListener;
+    /**
+     * 是否正在加载数据
+     */
+    private boolean mLoading = false;
+    /**
+     * 是否允许加载更多数据
+     */
+    private boolean mNextLoadEnable = false;
+    /**
+     * 允许加载更多的状态。
+     */
+    private boolean mLoadMoreEnable = false;
+    /**
+     * whether use empty view
+     */
+    private boolean isUseEmpty = true;
 
 
     public void setOnItemClickListener(OnItemClickListener mListener) {
@@ -49,7 +72,7 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         return mListener;
     }
 
-    public void setmListener(OnItemClickListener mListener) {
+    public void setItemClickListener(OnItemClickListener mListener) {
         this.mListener = mListener;
     }
 
@@ -116,7 +139,7 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
             e.printStackTrace();
         }
 
-        return (K)baseViewHolder ;
+        return (K) baseViewHolder;
     }
 
     protected View getItemView(int layoutResId, ViewGroup parent) {
@@ -153,25 +176,28 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         }
         int realPosition = getRealPosition(position);
         T t = mDatas.get(realPosition);
-        if(mListener!=null){
+        if (mListener != null) {
             holder.getItemView().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int position1 = holder.getLayoutPosition();
-                    if(position1!=NO_POSITION) {
+                    if (position1 != NO_POSITION) {
                         int realPosition = getRealPosition(position1);
-                        mListener.onItemClick(holder.getItemView(),realPosition);
+                        mListener.onItemClick(holder.getItemView(), realPosition);
                     }
                 }
             });
         }
-        convert(viewHolder,t);
+        convert(viewHolder, t);
     }
 
     protected abstract void convert(K viewHolder, T t);
 
     @Override
     public int getItemCount() {
+        if (getEmptyViewCount() == 1) {
+
+        }
         int itemCount = mDatas == null ? 0 : mDatas.size();
         if (null != emptyView && itemCount == 0) {
             itemCount++;
@@ -182,7 +208,24 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         if (null != footView) {
             itemCount++;
         }
+        itemCount += getHeadViewCount();
+        itemCount += getLoadMoreViewCount();
         return itemCount;
+    }
+
+    /**
+     * emptyview count
+     *
+     * @return if show empty view return 1,else return 0
+     */
+    private int getEmptyViewCount() {
+        if (emptyView == null) {
+            return 0;
+        }
+        if (!isUseEmpty) {
+            return 0;
+        }
+        return 1;
     }
 
     @Override
@@ -209,23 +252,42 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         return super.getItemViewType(position);
     }
 
+    /**
+     * 增加headview
+     *
+     * @param headView
+     */
     public void addHeadView(View headView) {
         this.headView = headView;
         notifyItemInserted(0);
     }
 
+    /**
+     * 增加footview
+     *
+     * @param footView
+     */
     public void addFootView(View footView) {
         this.footView = footView;
         notifyItemInserted(getItemCount() - 1);
     }
 
+    /**
+     * 设置数据为空的时候，显示的view
+     *
+     * @param emptyView
+     */
     public void setEmptyView(View emptyView) {
+        isUseEmpty = true;
+        boolean inSert = false;
+        if (this.emptyView != null) {
+            inSert = true;
+        }
         this.emptyView = emptyView;
-        notifyDataSetChanged();
-    }
-
-    public void setLoadMoreEnabled(boolean mOpenLoadMore) {
-        this.mOpenLoadMore = mOpenLoadMore;
+        if (inSert && getEmptyViewCount() == 1) {
+            int position = getHeadViewCount();
+            notifyItemInserted(position);
+        }
     }
 
     @Override
@@ -270,5 +332,110 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         }
     }
 
+    /**
+     * 设置加载更多时的动画，继承
+     */
+    public void setLoadMoreView(LoadMoreView view) {
+        this.mLoadMoreView = view;
+    }
 
+    /**
+     * 获取加载更多所占据的数量
+     *
+     * @return
+     */
+    private int getLoadMoreViewCount() {
+        if (mLoadMoreListener == null || mLoadMoreEnable) {//don`t have the function
+            return 0;
+        }
+        if (!mNextLoadEnable && mLoadMoreView.getLoadMoreStatus() == LoadMoreView.STATUS_END) {//load is over
+            return 0;
+        }
+        if (mDatas.size() == 0) {//has no data
+            return 0;
+        }
+        return 1;
+    }
+
+    /**
+     * 设置监听
+     *
+     * @param loadMoreListener
+     */
+    public void setLoadMoreListener(RequestLoadMoreListener loadMoreListener) {
+        this.mLoadMoreListener = loadMoreListener;
+        mLoadMoreEnable = true;
+        mNextLoadEnable = true;
+        mLoading = false;
+    }
+
+    /**
+     * 加载更多功能是否关闭，当根据页面进行加载的时候，如果当前加载的数据少于每页的长度，则表示，数据已经全部加载完成，不再需要进行加载更多的操作
+     *
+     * @param end
+     */
+    public void loadMoreEnd(boolean end) {
+        if (getLoadMoreViewCount() == 0) {
+            return;
+        }
+        mLoading = false;
+        mNextLoadEnable = false;
+        if (end) {//不再显示加载更多的图标和数据
+            notifyItemRemoved(mDatas.size() + getFootViewCount() + getHeadViewCount());
+        } else {
+            mLoadMoreView.setLoadMoreStatus(LoadMoreView.STATUS_END);
+            notifyItemChanged(mDatas.size() + getFootViewCount() + getHeadViewCount());
+        }
+    }
+
+    /**
+     * 数据加载更多成功
+     */
+    public void loadMoreComplete() {
+        if (getLoadMoreViewCount() == 0) {
+            return;
+        }
+        mLoading = false;
+        mLoadMoreView.setLoadMoreStatus(LoadMoreView.STATUS_DEFAULT);
+        notifyItemChanged(getHeadViewCount() + getFootViewCount() + mDatas.size());
+    }
+
+    /**
+     * 数据加载更多失败
+     */
+    public void loadMoreFail() {
+        if (getLoadMoreViewCount() == 0) {
+            return;
+        }
+        mLoading = false;
+        mLoadMoreView.setLoadMoreStatus(LoadMoreView.STATUS_FAIL);
+        notifyItemChanged(getHeadViewCount() + mDatas.size() + getFootViewCount());
+    }
+
+    /**
+     * Set the enable status of load more.eg:when pull to refresh ,loadmore is not enabled.
+     *
+     * @param enable true if more is enable ,false is not enable
+     */
+    public void setEnableLoadMore(boolean enable) {
+        int oldCount = getLoadMoreViewCount();
+        mLoadMoreEnable = enable;
+        int newCount = getLoadMoreViewCount();
+        if (newCount == 1 && oldCount == 0) {//not enable->enable
+            mLoadMoreView.setLoadMoreStatus(LoadMoreView.STATUS_DEFAULT);
+            notifyItemInserted(getHeadViewCount() + getFootViewCount() + mDatas.size());
+        }
+        if (newCount == 0 && oldCount == 1) {//enable ->not enable
+            notifyItemRemoved(getHeadViewCount() + getFootViewCount() + mDatas.size());
+        }
+
+    }
+
+    private int getFootViewCount() {
+        return footView == null ? 0 : 1;
+    }
+
+    private int getHeadViewCount() {
+        return headView == null ? 0 : 1;
+    }
 }

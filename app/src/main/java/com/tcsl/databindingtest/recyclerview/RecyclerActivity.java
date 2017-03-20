@@ -1,6 +1,7 @@
 package com.tcsl.databindingtest.recyclerview;
 
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,11 +22,15 @@ import java.util.List;
 
 import okhttp3.Request;
 
-public class RecyclerActivity extends AppCompatActivity {
+public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, RequestLoadMoreListener {
 
     private RecyclerView rvData;
     private RelativeLayout activityRecycler;
     private MyBindingAdapter madpater;
+    private SwipeRefreshLayout mSrLy;
+    private List<result.ResultsBean> mInfo;
+    private String baseUrl = "http://gank.io/api/data/福利/10/";
+    private int index=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +42,9 @@ public class RecyclerActivity extends AppCompatActivity {
 
     private void initValues() {
         DataModel model = new DataModel();
-        final List<result.ResultsBean> mInfo = new ArrayList<>();
+        mInfo = new ArrayList<>();
         HttpUtils.with(this)
-                .url("http://gank.io/api/data/福利/10/2")
+                .url(baseUrl+index)
                 .execute(new ResultCallback<result>() {
                     @Override
                     public void onSccessed(result result) {
@@ -63,10 +68,60 @@ public class RecyclerActivity extends AppCompatActivity {
         rvData.setLayoutManager(manager);
         rvData.setItemAnimator(new DefaultItemAnimator());
         rvData.setAdapter(madpater);
+        mSrLy.setOnRefreshListener(this);
+        madpater.setLoadMoreListener(this);
     }
 
     private void initView() {
         rvData = (RecyclerView) findViewById(R.id.rv_data);
         activityRecycler = (RelativeLayout) findViewById(R.id.activity_recycler);
+        mSrLy = (SwipeRefreshLayout) findViewById(R.id.sr_ly);
+    }
+
+    @Override
+    public void onRefresh() {
+        madpater.setEnableLoadMore(false);
+        index=0;
+        HttpUtils.with(this).url(baseUrl+index).execute(new ResultCallback<result>() {
+
+            @Override
+            public void onSccessed(result result) {
+                mInfo.clear();
+                mInfo.addAll(result.getResults());
+                madpater.notifyDataSetChanged();
+                mSrLy.setRefreshing(false);
+                madpater.setEnableLoadMore(true);
+            }
+
+            @Override
+            public void onError(Request request, Exception e) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onLoadMoreRequest() {
+        mSrLy.setEnabled(false);
+        index++;
+        HttpUtils.with(this).url(baseUrl+index).execute(new ResultCallback<result>() {
+            @Override
+            public void onSccessed(result result) {
+                mInfo.addAll(result.getResults());
+                madpater.notifyDataSetChanged();
+                mSrLy.setEnabled(true);
+                if(result.getResults().size()<30) {
+                    madpater.loadMoreEnd(true);
+                }else{
+                    madpater.loadMoreComplete();
+                }
+            }
+
+            @Override
+            public void onError(Request request, Exception e) {
+                madpater.loadMoreFail();
+            }
+        });
+
     }
 }

@@ -152,12 +152,8 @@ String str="{\n" +
         HttpUtils url = HttpUtils.with(getContext())
                 .url("http://gank.io/api/data/%E7%A6%8F%E5%88%A9/10/2");
         url.execute(resultCallback);
+        verify(url).execute(captor.capture());
         verify(resultCallback).onSccessed((com.tcsl.databindingtest.recyclerview.bean.result) results);
-      /*  verify(url).execute(captor.capture());
-        captor.getAllValues()
-        captor.getValue().onSccessed(Log.i(TAG,"OK"));
-        captor.getValue().onError(Log.d(TAG, "error"));
-*/
     }
 
 }
