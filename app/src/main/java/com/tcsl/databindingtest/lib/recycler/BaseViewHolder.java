@@ -37,4 +37,10 @@ public class BaseViewHolder extends RecyclerView.ViewHolder {
         TextView view = getView(viewId);
         view.setText(str);
     }
+
+    public BaseViewHolder setVisible(int viewId, boolean visible) {
+        View view = getView(viewId);
+        view.setVisibility(visible?View.VISIBLE:View.INVISIBLE);
+        return this;
+    }
 }

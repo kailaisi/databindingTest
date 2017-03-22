@@ -30,7 +30,7 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
     private SwipeRefreshLayout mSrLy;
     private List<result.ResultsBean> mInfo;
     private String baseUrl = "http://gank.io/api/data/福利/10/";
-    private int index=0;
+    private int index = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,22 +41,7 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
     }
 
     private void initValues() {
-        DataModel model = new DataModel();
         mInfo = new ArrayList<>();
-        HttpUtils.with(this)
-                .url(baseUrl+index)
-                .execute(new ResultCallback<result>() {
-                    @Override
-                    public void onSccessed(result result) {
-                        mInfo.addAll(result.getResults());
-                        madpater.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onError(Request request, Exception e) {
-                        Log.d("RecyclerActivity", e.getMessage());
-                    }
-                });
         madpater = new MyBindingAdapter(this, mInfo);
         madpater.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -70,6 +55,20 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
         rvData.setAdapter(madpater);
         mSrLy.setOnRefreshListener(this);
         madpater.setLoadMoreListener(this);
+        HttpUtils.with(this)
+                .url(baseUrl + index)
+                .execute(new ResultCallback<result>() {
+                    @Override
+                    public void onSccessed(result result) {
+                        mInfo.addAll(result.getResults());
+                        madpater.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onError(Request request, Exception e) {
+                        Log.d("RecyclerActivity", e.getMessage());
+                    }
+                });
     }
 
     private void initView() {
@@ -81,8 +80,8 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
     @Override
     public void onRefresh() {
         madpater.setEnableLoadMore(false);
-        index=0;
-        HttpUtils.with(this).url(baseUrl+index).execute(new ResultCallback<result>() {
+        index = 0;
+        HttpUtils.with(this).url(baseUrl + index).execute(new ResultCallback<result>() {
 
             @Override
             public void onSccessed(result result) {
@@ -95,7 +94,7 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
 
             @Override
             public void onError(Request request, Exception e) {
-
+                madpater.setEnableLoadMore(false);
             }
         });
     }
@@ -104,21 +103,28 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
     public void onLoadMoreRequest() {
         mSrLy.setEnabled(false);
         index++;
-        HttpUtils.with(this).url(baseUrl+index).execute(new ResultCallback<result>() {
+        HttpUtils.with(this).url(baseUrl + index).execute(new ResultCallback<result>() {
             @Override
-            public void onSccessed(result result) {
-                mInfo.addAll(result.getResults());
-                madpater.notifyDataSetChanged();
-                mSrLy.setEnabled(true);
-                if(result.getResults().size()<30) {
-                    madpater.loadMoreEnd(true);
-                }else{
-                    madpater.loadMoreComplete();
-                }
+            public void onSccessed(final result result) {
+                mSrLy.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mInfo.addAll(result.getResults());
+                        madpater.notifyDataSetChanged();
+                        mSrLy.setEnabled(true);
+                        if (result.getResults().size() < 30) {
+                            madpater.loadMoreEnd(true);
+                        } else {
+                            madpater.loadMoreComplete();
+                        }
+                    }
+                },10000);
+
             }
 
             @Override
             public void onError(Request request, Exception e) {
+                mSrLy.setEnabled(true);
                 madpater.loadMoreFail();
             }
         });

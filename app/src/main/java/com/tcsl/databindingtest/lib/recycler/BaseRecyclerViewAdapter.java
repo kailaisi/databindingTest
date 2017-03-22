@@ -26,7 +26,7 @@ import static android.support.v7.widget.RecyclerView.NO_POSITION;
 public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> extends RecyclerView.Adapter<K> {
 
     private static int ITEM_TYPE_HEADER = 0x00000111;
-    private static int ITEM_TYPE_LOADINGMORE = 0x00000555;
+    private static int ITEM_TYPE_LOAD_MORE = 0x00000222;
     private static int ITEM_TYPE_FOOTER = 0x00000333;
     private static int ITEM_TYPE_EMPTY = 0x00000555;
     private View headView;
@@ -41,7 +41,7 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
     /**
      * 加载更多的动画
      */
-    private LoadMoreView mLoadMoreView;
+    private LoadMoreView mLoadMoreView = new SimpleLoadMore();
     /**
      * 发起请求更多
      */
@@ -62,6 +62,10 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
      * whether use empty view
      */
     private boolean isUseEmpty = true;
+    /**
+     * when size is small than this, don`t load more
+     */
+    private int mAutoLoadMoreSize = 1;
 
 
     public void setOnItemClickListener(OnItemClickListener mListener) {
@@ -87,17 +91,34 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
     @Override
     public K onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        BaseViewHolder holder = null;
+        K holder = null;
         if (viewType == ITEM_TYPE_HEADER) {
-            holder = new BaseViewHolder(headView);
+            holder = createBaseViewHolder(headView);
         } else if (viewType == ITEM_TYPE_EMPTY) {
-            holder = new BaseViewHolder(emptyView);
+            holder = createBaseViewHolder(emptyView);
         } else if (viewType == ITEM_TYPE_FOOTER) {
-            holder = new BaseViewHolder(footView);
+            holder = createBaseViewHolder(footView);
+        } else if (viewType == ITEM_TYPE_LOAD_MORE) {
+            holder = getLoadingView(parent);
         } else {
             holder = onCreateDefViewHolder(parent, viewType);
         }
-        return (K) holder;
+        return holder;
+    }
+
+    private K getLoadingView(ViewGroup parent) {
+        View view = getItemView(mLoadMoreView.getLayoutId(), parent);
+        K holder = createBaseViewHolder(view);
+        holder.getItemView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mLoadMoreView.getLoadMoreStatus() == LoadMoreView.STATUS_FAIL) {
+                    mLoadMoreView.setLoadMoreStatus(LoadMoreView.STATUS_DEFAULT);
+                    notifyItemChanged(getHeadViewCount() + mDatas.size() + getFootViewCount());
+                }
+            }
+        });
+        return holder;
     }
 
     protected K onCreateDefViewHolder(ViewGroup parent, int viewType) {
@@ -174,7 +195,11 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         if (type == ITEM_TYPE_HEADER || type == ITEM_TYPE_EMPTY || type == ITEM_TYPE_FOOTER) {
             return;
         }
-        int realPosition = getRealPosition(position);
+        if (type == ITEM_TYPE_LOAD_MORE) {
+            mLoadMoreView.convert(holder);
+            return;
+        }
+        int realPosition = holder.getLayoutPosition() - getHeadViewCount();
         T t = mDatas.get(realPosition);
         if (mListener != null) {
             holder.getItemView().setOnClickListener(new View.OnClickListener() {
@@ -182,8 +207,7 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
                 public void onClick(View v) {
                     int position1 = holder.getLayoutPosition();
                     if (position1 != NO_POSITION) {
-                        int realPosition = getRealPosition(position1);
-                        mListener.onItemClick(holder.getItemView(), realPosition);
+                        mListener.onItemClick(holder.getItemView(), holder.getLayoutPosition() - getHeadViewCount());
                     }
                 }
             });
@@ -195,22 +219,8 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
 
     @Override
     public int getItemCount() {
-        if (getEmptyViewCount() == 1) {
-
-        }
         int itemCount = mDatas == null ? 0 : mDatas.size();
-        if (null != emptyView && itemCount == 0) {
-            itemCount++;
-        }
-        if (null != headView) {
-            itemCount++;
-        }
-        if (null != footView) {
-            itemCount++;
-        }
-        itemCount += getHeadViewCount();
-        itemCount += getLoadMoreViewCount();
-        return itemCount;
+        return itemCount + getHeadViewCount() + getFootViewCount() + getLoadMoreViewCount() + getEmptyViewCount();
     }
 
     /**
@@ -225,21 +235,50 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         if (!isUseEmpty) {
             return 0;
         }
+        if (mDatas.size() != 0) {
+            return 0;
+        }
         return 1;
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (null != headView && position == 0) {
-            return ITEM_TYPE_HEADER;
-        }
-        if (null != footView && position == getItemCount() - 1) {
-            return ITEM_TYPE_FOOTER;
-        }
-        if (emptyView != null && mDatas.size() == 0) {
+        if (getEmptyViewCount()!=0 && mDatas.size() == 0) {
             return ITEM_TYPE_EMPTY;
         }
+        if (position<getHeadViewCount()) {
+            return ITEM_TYPE_HEADER;
+        }
+        if (getFootViewCount()!=0 && position == getItemCount() - getHeadViewCount() - getLoadMoreViewCount()) {
+            return ITEM_TYPE_FOOTER;
+        }
+        autoLoadMore(position);
+        if (getLoadMoreViewCount() != 0 && position == getItemCount() - 1) {
+            return ITEM_TYPE_LOAD_MORE;
+        }
         return getDefaultItemViewType(getRealPosition(position));
+    }
+
+    /**
+     * load relay on postion,
+     *
+     * @param position
+     */
+    private void autoLoadMore(int position) {
+        if (getLoadMoreViewCount() == 0) {
+            return;
+        }
+        if (position < getItemCount() - mAutoLoadMoreSize) {
+            return;
+        }
+        if (mLoadMoreView.getLoadMoreStatus() != LoadMoreView.STATUS_DEFAULT) {
+            return;
+        }
+        mLoadMoreView.setLoadMoreStatus(LoadMoreView.STATUS_LOADING);
+        if (!mLoading) {
+            mLoading = true;
+            mLoadMoreListener.onLoadMoreRequest();
+        }
     }
 
     /**
@@ -295,7 +334,7 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         //http://blog.csdn.net/qibin0506/article/details/49716795
         super.onViewAttachedToWindow(holder);
         int viewType = holder.getItemViewType();
-        if (viewType == ITEM_TYPE_FOOTER || viewType == ITEM_TYPE_HEADER) {
+        if (viewType == ITEM_TYPE_FOOTER || viewType == ITEM_TYPE_HEADER || viewType == ITEM_TYPE_LOAD_MORE) {
             setFullPan(holder);
         }
     }
@@ -310,7 +349,7 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
                 @Override
                 public int getSpanSize(int position) {
                     int viewType = getItemViewType(position);
-                    if (viewType == ITEM_TYPE_FOOTER || viewType == ITEM_TYPE_HEADER) {
+                    if (viewType == ITEM_TYPE_FOOTER || viewType == ITEM_TYPE_HEADER || viewType == ITEM_TYPE_LOAD_MORE) {
                         //如果是表头或者底部，则占据的行数为gridlayout的行数
                         return gridLayoutManager.getSpanCount();
                     }
@@ -345,7 +384,7 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
      * @return
      */
     private int getLoadMoreViewCount() {
-        if (mLoadMoreListener == null || mLoadMoreEnable) {//don`t have the function
+        if (mLoadMoreListener == null || !mLoadMoreEnable) {//don`t have the function
             return 0;
         }
         if (!mNextLoadEnable && mLoadMoreView.getLoadMoreStatus() == LoadMoreView.STATUS_END) {//load is over
