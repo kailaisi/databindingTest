@@ -1,6 +1,5 @@
 package com.tcsl.databindingtest.lib.httpLoader;
 
-import com.google.gson.Gson;
 import com.google.gson.internal.$Gson$Types;
 
 import java.lang.reflect.ParameterizedType;
@@ -17,10 +16,10 @@ public abstract class ResultCallback<T> {
     Type mType;
 
     public ResultCallback() {
-        mType = getTypeParamse(getClass());
+        mType = getTypeParame(getClass());
     }
 
-    public Type getTypeParamse(Class<?> clazz) {
+    public Type getTypeParame(Class<?> clazz) {
         Type superclass = clazz.getGenericSuperclass();
         if (superclass instanceof Class) {
             throw new RuntimeException("Missing type parameter.");
@@ -29,7 +28,7 @@ public abstract class ResultCallback<T> {
         return $Gson$Types.canonicalize(parameterized.getActualTypeArguments()[0]);
     }
 
-    public abstract void onSccessed(T result);
+    public abstract void onSuccess(T result);
 
     public abstract void onError(Request request, Exception e);
 }

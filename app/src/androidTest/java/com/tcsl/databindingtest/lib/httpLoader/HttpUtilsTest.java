@@ -1,22 +1,15 @@
 package com.tcsl.databindingtest.lib.httpLoader;
 
 import android.test.AndroidTestCase;
-import android.util.Log;
 
 import com.google.gson.Gson;
-import com.tcsl.databindingtest.httpwithiinfo.Result;
 import com.tcsl.databindingtest.recyclerview.bean.result;
 
-import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 
 import java.util.List;
 
-import okhttp3.Request;
-
-import static android.content.ContentValues.TAG;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -153,7 +146,7 @@ String str="{\n" +
                 .url("http://gank.io/api/data/%E7%A6%8F%E5%88%A9/10/2");
         url.execute(resultCallback);
         verify(url).execute(captor.capture());
-        verify(resultCallback).onSccessed((com.tcsl.databindingtest.recyclerview.bean.result) results);
+        verify(resultCallback).onSuccess((com.tcsl.databindingtest.recyclerview.bean.result) results);
     }
 
 }

@@ -1,7 +1,6 @@
 package com.tcsl.databindingtest.bindingadapter;
 
 import android.databinding.BindingAdapter;
-import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 import com.tcsl.databindingtest.lib.imageLoader.ImageLoaderOptions;

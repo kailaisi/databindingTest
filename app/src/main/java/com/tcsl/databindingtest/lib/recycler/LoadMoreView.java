@@ -68,7 +68,7 @@ abstract class LoadMoreView {
     }
 
     private void visibleLoadEnd(BaseViewHolder holder, boolean visible) {
-        final int loadEndViewId=getLoadEndViewId();
+        final int loadEndViewId = getLoadEndViewId();
         if (loadEndViewId != 0) {
             holder.setVisible(loadEndViewId, visible);
         }
@@ -80,26 +80,34 @@ abstract class LoadMoreView {
      *
      * @return
      */
-    public abstract @LayoutRes int getLayoutId();
+    public abstract
+    @LayoutRes
+    int getLayoutId();
 
     /**
      * loading view
      *
      * @return
      */
-    protected abstract @IdRes  int getLoadingViewId();
+    protected abstract
+    @IdRes
+    int getLoadingViewId();
 
     /**
      * load fail view
      *
      * @return
      */
-    protected abstract @IdRes int getLoadFailViewId();
+    protected abstract
+    @IdRes
+    int getLoadFailViewId();
 
     /**
      * load end view, you can return 0
      *
      * @return
      */
-    protected abstract @IdRes int getLoadEndViewId();
+    protected abstract
+    @IdRes
+    int getLoadEndViewId();
 }

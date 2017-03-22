@@ -59,7 +59,7 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
                 .url(baseUrl + index)
                 .execute(new ResultCallback<result>() {
                     @Override
-                    public void onSccessed(result result) {
+                    public void onSuccess(result result) {
                         mInfo.addAll(result.getResults());
                         madpater.notifyDataSetChanged();
                     }
@@ -84,7 +84,7 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
         HttpUtils.with(this).url(baseUrl + index).execute(new ResultCallback<result>() {
 
             @Override
-            public void onSccessed(result result) {
+            public void onSuccess(result result) {
                 mInfo.clear();
                 mInfo.addAll(result.getResults());
                 madpater.notifyDataSetChanged();
@@ -105,21 +105,15 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
         index++;
         HttpUtils.with(this).url(baseUrl + index).execute(new ResultCallback<result>() {
             @Override
-            public void onSccessed(final result result) {
-                mSrLy.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mInfo.addAll(result.getResults());
-                        madpater.notifyDataSetChanged();
-                        mSrLy.setEnabled(true);
-                        if (result.getResults().size() < 30) {
-                            madpater.loadMoreEnd(true);
-                        } else {
-                            madpater.loadMoreComplete();
-                        }
-                    }
-                },10000);
-
+            public void onSuccess(final result result) {
+                mInfo.addAll(result.getResults());
+                madpater.notifyDataSetChanged();
+                mSrLy.setEnabled(true);
+                if (result.getResults().size() < 30) {
+                    madpater.loadMoreEnd(true);
+                } else {
+                    madpater.loadMoreComplete();
+                }
             }
 
             @Override

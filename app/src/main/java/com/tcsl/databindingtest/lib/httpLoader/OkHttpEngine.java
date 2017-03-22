@@ -6,18 +6,18 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 
@@ -37,7 +37,11 @@ public class OkHttpEngine implements HttpEngine {
     }
 
 
-    private static OkHttpClient mOkHttpClient = new OkHttpClient();
+    private static OkHttpClient mOkHttpClient = new OkHttpClient.Builder()
+            .connectTimeout(30000, TimeUnit.MILLISECONDS)
+            .readTimeout(30000, TimeUnit.MILLISECONDS)
+            .writeTimeout(30000, TimeUnit.MILLISECONDS)
+            .build();
     Interceptor cacheInterceptor = new Interceptor() {
         @Override
         public Response intercept(Chain chain) throws IOException {
@@ -51,42 +55,50 @@ public class OkHttpEngine implements HttpEngine {
 
     //client.setCache(new Cache(context.getCacheDir(),maxCacheSize));
     @Override
-    public void post(Context context, String url, Map<String, Object> params, ResultCallback callback, boolean cache) {
-    }
-
-    @Override
-    public void get(final Context context, String url, Map<String, Object> params, ResultCallback callback, HttpOption option) {
+    public void post(Object tag, String url, Map<String, Object> params, ResultCallback callback, HttpOption option) {
         Request.Builder builder = new Request.Builder();
+        MediaType parse = MediaType.parse("text/json;charset=utf-8");
+        RequestBody body = RequestBody.create(parse, "str");
+        builder.post(body);
         builder.url(url)
-                .get()
-                .tag(context);
+                .tag(tag);
         Request req = builder.build();
         deliveryResult(callback, req);
     }
 
     @Override
-    public void cancelWithContext(Context context) {
-        if (context == null) {
+    public void get(Object tag, String url, Map<String, Object> params, ResultCallback callback, HttpOption option) {
+        Request.Builder builder = new Request.Builder();
+        builder.url(url)
+                .get()
+                .tag(tag);
+        Request req = builder.build();
+        deliveryResult(callback, req);
+    }
+
+    @Override
+    public void cancelWithTag(Object tag) {
+        if (tag == null) {
             return;
         }
         synchronized (mOkHttpClient.dispatcher().getClass()) {
             for (Call call : mOkHttpClient.dispatcher().queuedCalls()) {
-                if (call.request().tag().equals("sss"))
+                if (call.request().tag().equals(tag))
                     call.cancel();
             }
             for (Call call : mOkHttpClient.dispatcher().runningCalls()) {
-                if (call.request().tag().equals("sss"))
+                if (call.request().tag().equals(tag))
                     call.cancel();
             }
         }
     }
 
-    @Override
-    public void cancel() {
-
-    }
-
-
+    /**
+     * 发送网络请求，并进行回调
+     *
+     * @param callback
+     * @param request
+     */
     private void deliveryResult(final ResultCallback callback, final Request request) {
         mOkHttpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -140,7 +152,7 @@ public class OkHttpEngine implements HttpEngine {
             @Override
             public void run() {
                 if (callback != null) {
-                    callback.onSccessed(object);
+                    callback.onSuccess(object);
                 }
             }
         });

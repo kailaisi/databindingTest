@@ -1,7 +1,5 @@
 package com.tcsl.databindingtest.lib.httpLoader;
 
-import android.content.Context;
-
 import java.util.Map;
 
 /**
@@ -11,15 +9,13 @@ import java.util.Map;
  */
 public interface HttpEngine {
     // post 提交
-    void post(Context context, String url, Map<String, Object> params, ResultCallback httpCallBack, boolean cache);
+    void post(Object tag, String url, Map<String, Object> params, ResultCallback httpCallBack, HttpOption option);
 
     // get 提交
-    void get(Context context, String url, Map<String, Object> params, ResultCallback httpCallBack, HttpOption option);
+    void get(Object tag, String url, Map<String, Object> params, ResultCallback httpCallBack, HttpOption option);
 
     // 取消请求
-    void cancelWithContext(Context context);//取消以context作为tag的请求
-
-    void cancel();//取消某次请求
+    void cancelWithTag(Object tag);//可以以context为参数，也可以设置固定的tag
     // 下载文件
     // 上传文件
     // https添加安全证书
