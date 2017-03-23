@@ -23,14 +23,17 @@ import java.util.List;
 import okhttp3.Request;
 
 public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, RequestLoadMoreListener {
-
+    /**
+     * 每页请求的数据
+     */
+    private static final int PAGER_SIZE = 10;
     private RecyclerView rvData;
     private RelativeLayout activityRecycler;
     private MyBindingAdapter madpater;
     private SwipeRefreshLayout mSrLy;
     private List<result.ResultsBean> mInfo;
     private String baseUrl = "http://gank.io/api/data/福利/10/";
-    private int index = 0;
+    private int index = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +83,7 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
     @Override
     public void onRefresh() {
         madpater.setEnableLoadMore(false);
-        index = 0;
+        index = 1;
         HttpUtils.with(this).url(baseUrl + index).execute(new ResultCallback<result>() {
 
             @Override
@@ -109,7 +112,7 @@ public class RecyclerActivity extends AppCompatActivity implements SwipeRefreshL
                 mInfo.addAll(result.getResults());
                 madpater.notifyDataSetChanged();
                 mSrLy.setEnabled(true);
-                if (result.getResults().size() < 30) {
+                if (result.getResults().size() < PAGER_SIZE) {
                     madpater.loadMoreEnd(true);
                 } else {
                     madpater.loadMoreComplete();

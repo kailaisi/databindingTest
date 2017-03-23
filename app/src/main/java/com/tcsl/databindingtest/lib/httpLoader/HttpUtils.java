@@ -169,12 +169,4 @@ public class HttpUtils {
         mHttpEngine.cancelWithTag(tag);
     }
 
-
-    public static class Builder {
-        private String url;
-        private int method = GET_REQUEST;
-        private Object tag;
-        private Map<String, Object> params = new HashMap<>();
-    }
-
 }

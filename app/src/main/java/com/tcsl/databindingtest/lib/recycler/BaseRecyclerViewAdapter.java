@@ -420,9 +420,9 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         mLoading = false;
         mNextLoadEnable = false;
         if (end) {//不再显示加载更多的图标和数据
+            mLoadMoreView.setLoadMoreStatus(LoadMoreView.STATUS_END);
             notifyItemRemoved(mDatas.size() + getFootViewCount() + getHeadViewCount());
         } else {
-            mLoadMoreView.setLoadMoreStatus(LoadMoreView.STATUS_END);
             notifyItemChanged(mDatas.size() + getFootViewCount() + getHeadViewCount());
         }
     }

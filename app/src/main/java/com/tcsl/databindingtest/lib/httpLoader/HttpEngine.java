@@ -9,10 +9,10 @@ import java.util.Map;
  */
 public interface HttpEngine {
     // post 提交
-    void post(Object tag, String url, Map<String, Object> params, ResultCallback httpCallBack, HttpOption option);
+    void post(Object tag, String url, Map<String, Object> params, ResultCallback httpCallBack, HttpOptions option);
 
     // get 提交
-    void get(Object tag, String url, Map<String, Object> params, ResultCallback httpCallBack, HttpOption option);
+    void get(Object tag, String url, Map<String, Object> params, ResultCallback httpCallBack, HttpOptions option);
 
     // 取消请求
     void cancelWithTag(Object tag);//可以以context为参数，也可以设置固定的tag

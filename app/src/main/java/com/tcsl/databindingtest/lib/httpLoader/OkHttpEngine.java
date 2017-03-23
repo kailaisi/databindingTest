@@ -1,6 +1,5 @@
 package com.tcsl.databindingtest.lib.httpLoader;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -30,6 +29,9 @@ public class OkHttpEngine implements HttpEngine {
     private final String TAG = getClass().getSimpleName();
     private Handler mHandler;
     private Gson mGson;
+    private static long connectTimeout = 3000;
+    private static long readTimeout = 3000;
+    private static long writeTimeout = 3000;
 
     public OkHttpEngine() {
         mHandler = new Handler(Looper.getMainLooper());
@@ -38,9 +40,9 @@ public class OkHttpEngine implements HttpEngine {
 
 
     private static OkHttpClient mOkHttpClient = new OkHttpClient.Builder()
-            .connectTimeout(30000, TimeUnit.MILLISECONDS)
-            .readTimeout(30000, TimeUnit.MILLISECONDS)
-            .writeTimeout(30000, TimeUnit.MILLISECONDS)
+            .connectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
+            .readTimeout(readTimeout, TimeUnit.MILLISECONDS)
+            .writeTimeout(writeTimeout, TimeUnit.MILLISECONDS)
             .build();
     Interceptor cacheInterceptor = new Interceptor() {
         @Override
@@ -55,7 +57,7 @@ public class OkHttpEngine implements HttpEngine {
 
     //client.setCache(new Cache(context.getCacheDir(),maxCacheSize));
     @Override
-    public void post(Object tag, String url, Map<String, Object> params, ResultCallback callback, HttpOption option) {
+    public void post(Object tag, String url, Map<String, Object> params, ResultCallback callback, HttpOptions option) {
         Request.Builder builder = new Request.Builder();
         MediaType parse = MediaType.parse("text/json;charset=utf-8");
         RequestBody body = RequestBody.create(parse, "str");
@@ -66,8 +68,25 @@ public class OkHttpEngine implements HttpEngine {
         deliveryResult(callback, req);
     }
 
+    /**
+     * 设置超时时间
+     *
+     * @param timeout 超时时间，
+     */
+    public void setTimeout(long timeout) {
+        if (timeout > 0) {
+            OkHttpClient.Builder builder = mOkHttpClient.newBuilder();
+            builder.writeTimeout(timeout, TimeUnit.MILLISECONDS)
+                    .readTimeout(timeout, TimeUnit.MILLISECONDS)
+                    .connectTimeout(timeout, TimeUnit.MILLISECONDS);
+            mOkHttpClient = builder.build();
+        } else {
+            throw new IllegalArgumentException("timeout must be bigger than 0");
+        }
+    }
+
     @Override
-    public void get(Object tag, String url, Map<String, Object> params, ResultCallback callback, HttpOption option) {
+    public void get(Object tag, String url, Map<String, Object> params, ResultCallback callback, HttpOptions option) {
         Request.Builder builder = new Request.Builder();
         builder.url(url)
                 .get()
