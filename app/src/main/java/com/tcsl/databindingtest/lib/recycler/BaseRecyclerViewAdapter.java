@@ -80,12 +80,37 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
         this.mListener = mListener;
     }
 
-    OnItemClickListener mListener;
+    protected OnItemClickListener mListener;
 
     public BaseRecyclerViewAdapter(Context context, List<T> mDatas) {
         mContext = context;
         this.mDatas = mDatas;
         this.mLayoutInflater = LayoutInflater.from(mContext);
+    }
+
+    /**
+     * 设置新数据
+     *
+     * @param newData
+     */
+    public void setNewData(List<T> newData) {
+        mDatas.clear();
+        if (newData != null) {
+            mDatas.addAll(newData);
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
+     * 增加新数据
+     *
+     * @param datas
+     */
+    public void addData(List<T> datas) {
+        if (datas != null) {
+            mDatas.addAll(datas);
+        }
+        notifyItemRangeInserted(mDatas.size()-datas.size()+getHeadViewCount(),datas.size());
     }
 
     @Override
@@ -243,13 +268,13 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
 
     @Override
     public int getItemViewType(int position) {
-        if (getEmptyViewCount()!=0 && mDatas.size() == 0) {
+        if (getEmptyViewCount() != 0 && mDatas.size() == 0) {
             return ITEM_TYPE_EMPTY;
         }
-        if (position<getHeadViewCount()) {
+        if (position < getHeadViewCount()) {
             return ITEM_TYPE_HEADER;
         }
-        if (getFootViewCount()!=0 && position == getItemCount() - getHeadViewCount() - getLoadMoreViewCount()) {
+        if (getFootViewCount() != 0 && position == getItemCount() - getHeadViewCount() - getLoadMoreViewCount()) {
             return ITEM_TYPE_FOOTER;
         }
         autoLoadMore(position);
@@ -470,11 +495,11 @@ public abstract class BaseRecyclerViewAdapter<T, K extends BaseViewHolder> exten
 
     }
 
-    private int getFootViewCount() {
+    public int getFootViewCount() {
         return footView == null ? 0 : 1;
     }
 
-    private int getHeadViewCount() {
+    public int getHeadViewCount() {
         return headView == null ? 0 : 1;
     }
 }

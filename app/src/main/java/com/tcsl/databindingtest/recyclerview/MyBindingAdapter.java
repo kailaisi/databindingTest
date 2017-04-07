@@ -3,6 +3,7 @@ package com.tcsl.databindingtest.recyclerview;
 import android.content.Context;
 import android.databinding.ViewDataBinding;
 import android.view.View;
+import android.widget.Toast;
 
 import com.tcsl.databindingtest.R;
 import com.tcsl.databindingtest.databinding.ItemDataBindingBinding;
@@ -17,7 +18,7 @@ import java.util.List;
  * <p/>作者：wjx
  * <p/>创建时间: 2017/2/24 16:10
  */
-public class MyBindingAdapter extends BaseDataBindingAdapter<result.ResultsBean,BaseDataBindingViewHolder> {
+public class MyBindingAdapter extends BaseDataBindingAdapter<result.ResultsBean, BaseDataBindingViewHolder> {
     public MyBindingAdapter(Context context, List mDatas) {
         super(context, mDatas);
     }
@@ -28,13 +29,18 @@ public class MyBindingAdapter extends BaseDataBindingAdapter<result.ResultsBean,
     }
 
     @Override
-    protected void bind(ViewDataBinding binding, result.ResultsBean resultsBean) {
-        if(binding==null){
+    protected void bind(final BaseDataBindingViewHolder viewHolder, ViewDataBinding binding, result.ResultsBean resultsBean) {
+        if (binding == null) {
             return;
         }
-        ItemDataBindingBinding bind= (ItemDataBindingBinding) binding;
-        View root = bind.getRoot();
+        ItemDataBindingBinding bind = (ItemDataBindingBinding) binding;
         bind.setIteminfo(resultsBean);
-        bind.setAdapter(this);
+        bind.tvPic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = viewHolder.getLayoutPosition() - getHeadViewCount();
+                Toast.makeText(mContext, "position:" + position, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

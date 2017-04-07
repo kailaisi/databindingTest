@@ -34,10 +34,10 @@ public abstract class BaseDataBindingAdapter<T, K extends BaseDataBindingViewHol
     @Override
     protected void convert(K viewHolder, T t) {
         ViewDataBinding binding = viewHolder.getBinding();
-        bind(binding,t);
+        bind(viewHolder,binding,t);
         binding.executePendingBindings();
     }
 
-    protected abstract void bind(ViewDataBinding binding, T t);
+    protected abstract void bind(K viewHolder, ViewDataBinding binding, T t);
 
 }

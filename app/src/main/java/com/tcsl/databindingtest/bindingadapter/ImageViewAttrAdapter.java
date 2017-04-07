@@ -1,6 +1,7 @@
 package com.tcsl.databindingtest.bindingadapter;
 
 import android.databinding.BindingAdapter;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.widget.ImageView;
 
 import com.tcsl.databindingtest.lib.imageLoader.ImageLoaderOptions;
@@ -14,11 +15,11 @@ import com.tcsl.databindingtest.lib.imageLoader.PicassoLoader;
  */
 public class ImageViewAttrAdapter {
     @BindingAdapter(value = {"imageUrl", "error"}, requireAll = false)
-    public static void setImageUrl(ImageView imageView, String url, int  error) {
+    public static void setImageUrl(ImageView imageView, String url, int error) {
         ImageLoaderStrategyManager manager = ImageLoaderStrategyManager.getInstance();
         manager.setLoader(new PicassoLoader());
         ImageLoaderOptions.Builder builder = new ImageLoaderOptions.Builder();
-        if(error!=0){
+        if (error != 0) {
             builder.errorDrawable(error);
         }
         builder.isCrossFade(true);
