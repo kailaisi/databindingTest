@@ -1,0 +1,93 @@
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+ext {
+    //Android
+    androidBuildToolsVersion = "25.0.3"
+    androidMinSdkVersion = 15
+    androidTargetSdkVersion = 22
+    androidCompileSdkVersion = 26
+
+    androidVersionCode = 1
+    androidVersionName = "1.0"
+
+    //Libraries
+    glideVersion = '3.7.0'
+    daggerVersion = '2.4'
+    daggerAnnotationVersion='10.0-b28'
+    butterKnifeVersion = '8.7.0'
+    butterKnifeAptVersion = '8.7.0'
+    rxJavaVersion = '2.0.1'
+    rxAndroidVersion = '2.0.1'
+    javaxAnnotationVersion = '1.0'
+    gsonVersion = '2.8.1'
+    okhttpVersion = '3.8.1'
+    retrofitVersion = '2.3.0'
+    android_support_annotations = '24.0.0'
+    recyclerViewVersion = '26.0.0-alpha1'
+    android_support_v4 = '26.0.0-alpha1'
+    android_support_v7 = '26.0.0-alpha1'
+    android_design = '26.0.0-alpha1'
+    cardview = "26.0.0-alpha1"
+    cupboardVersion = '2.1.4'
+    guavaVersion = '18.0'
+    jacksonDatabindVersion = '2.4.4'
+    loggerVersion = '2.1.1'
+    converterGsonVersion = '2.3.0'
+    adapterRxjavaVersion = '2.3.0'
+    loggingInterceptorVersion = '3.8.1'
+    viewmodelVersion='1.0.0-alpha3'
+    appDependencies = [
+            recyclerView      : "com.android.support:recyclerview-v7:${recyclerViewVersion}",
+            javaxAnnotation   : "javax.annotation:jsr250-api:${javaxAnnotationVersion}",
+            android_support_v7: "com.android.support:appcompat-v7:${android_support_v7}",
+            gridlayout        : "com.android.support:gridlayout-v7:${android_support_v7}",
+            android_design    : "com.android.support:design:${android_design}",
+            cardview          : "com.android.support:cardview-v7:${cardview}",
+            glide             : "com.github.bumptech.glide:glide:${glideVersion}",
+            retrofit          : "com.squareup.retrofit2:${retrofitVersion}",
+            daggerCompiler    : "com.google.dagger:dagger-compiler:${daggerVersion}",
+            dagger            : "com.google.dagger:dagger:${daggerVersion}",
+            butterKnife       : "com.jakewharton:butterknife:${butterKnifeVersion}",
+            rxJava            : "io.reactivex:rxjava2:rxjava:${rxJavaVersion}",
+            rxAndroid         : "io.reactivex:rxjava2:rxandroid:${rxAndroidVersion}",
+            gson              : "com.google.code.gson:gson:${gsonVersion}",
+            okhttp            : "com.squareup.okhttp3:okhttp:${okhttpVersion}",
+            butterKnifeApt    : "com.jakewharton:butterknife-compiler:${butterKnifeAptVersion}",
+            cupboard          : "nl.qbusict:cupboard:${cupboardVersion}"
+    ]
+
+    dataDependencies = [
+            gson              : "com.google.code.gson:gson:${gsonVersion}",
+            retrofit          : "com.squareup.retrofit2:retrofit:${retrofitVersion}",
+            rxJava            : "io.reactivex.rxjava2:rxjava:${rxJavaVersion}",
+            rxAndroid         : "io.reactivex.rxjava2:rxandroid:${rxAndroidVersion}",
+            javaxAnnotation   : "javax.annotation:jsr250-api:${javaxAnnotationVersion}",
+            okhttp            : "com.squareup.okhttp3:okhttp:${okhttpVersion}",
+            logger            : "com.orhanobut:logger:${loggerVersion}",
+            converterGson     : "com.squareup.retrofit2:converter-gson:${converterGsonVersion}",
+            adapterRxjava     : "com.squareup.retrofit2:adapter-rxjava2:${adapterRxjavaVersion}",
+            loggingInterceptor:"com.squareup.okhttp3:logging-interceptor:${loggingInterceptorVersion}",
+    ]
+    viewmodelDependencies=[
+            recyclerView      : "com.android.support:recyclerview-v7:${recyclerViewVersion}",
+            android_support_v7: "com.android.support:appcompat-v7:${android_support_v7}",
+            dagger            : "com.google.dagger:dagger:${daggerVersion}",
+            daggercompiler    : "com.google.dagger:dagger-compiler:${daggerVersion}",
+            runtime           :"android.arch.lifecycle:runtime:${viewmodelVersion}",
+            extensions        :"android.arch.lifecycle:extensions:${viewmodelVersion}",
+            viewmodelcompiler :"android.arch.lifecycle:compiler:${viewmodelVersion}",
+            gson              : "com.google.code.gson:gson:${gsonVersion}",
+            retrofit          : "com.squareup.retrofit2:retrofit:${retrofitVersion}",
+            rxJava            : "io.reactivex.rxjava2:rxjava:${rxJavaVersion}",
+            rxAndroid         : "io.reactivex.rxjava2:rxandroid:${rxAndroidVersion}",
+            okhttp            : "com.squareup.okhttp3:okhttp:${okhttpVersion}",
+            logger            : "com.orhanobut:logger:${loggerVersion}",
+            converterGson     : "com.squareup.retrofit2:converter-gson:${converterGsonVersion}",
+            adapterRxjava     : "com.squareup.retrofit2:adapter-rxjava2:${adapterRxjavaVersion}",
+            loggingInterceptor:"com.squareup.okhttp3:logging-interceptor:${loggingInterceptorVersion}",
+    ]
+}

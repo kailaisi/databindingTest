@@ -1,0 +1,41 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+
+    defaultConfig {
+        applicationId "com.tcsl.viewmodel"
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    def dependencies=rootProject.ext.viewmodelDependencies
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile dependencies.runtime
+    compile dependencies.extensions
+    annotationProcessor dependencies.viewmodelcompiler
+    compile dependencies.dagger
+    compile dependencies.daggercompiler
+    compile dependencies.recyclerView
+    compile dependencies.android_support_v7
+    compile dependencies.retrofit
+    compile dependencies.okhttp
+    compile dependencies.logger
+    compile dependencies.converterGson
+    compile dependencies.adapterRxjava
+    compile dependencies.loggingInterceptor
+    compile dependencies.rxJava
+    compile dependencies.rxAndroid
+    compile 'com.android.support:multidex:1.0.1'
+}
